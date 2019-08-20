@@ -30,6 +30,6 @@ This is the initial release for "regularizeCNN". Current release provides few wo
 *  matplotlib 3.0.1
 
 ## Usage:
-**run_all.py** : Train a new neural-net with specified dataset and save to file "\*.module". By default, it will use CIFAR10 as dataset and save to "test.model"
+**run_all.py** : Train a new neural-net with specified dataset and save to file "\*.model". By default, it will use CIFAR10 as dataset and save to "test.model"
 
 **adversary_demo.py** : Load a pre-trained net from file and generate adversary samples that can fool the net.
