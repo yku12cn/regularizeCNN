@@ -28,7 +28,7 @@ if __name__ == "__main__":
                'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
     # Init NN
-    net = Net(device=device, filename="test.model")
+    net = Net(device=device, filename="l2truenorm.model")
 
     while True:
         n = random.randint(0, 9999)
@@ -42,7 +42,7 @@ if __name__ == "__main__":
               (classes[prid1[0]], "correct" if co[0] == 1 else "wrong"))
 
         # generate adversary
-        adversary = advLib.genAdv(data, net)
+        adversary, _ = advLib.genAdv(data, net)
 
         # test with NN
         prid2, co = evalNN.evalCLF([adversary, data[1]], net)

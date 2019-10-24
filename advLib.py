@@ -45,7 +45,7 @@ def genGrad(image, net):
     return grads, output.detach()
 
 
-def genAdv(data, net, rate=1.01):
+def genAdv(data, net, rate=1.01, maxtry=100):
     r"""generate closest adversary.
 
     Arguments:
@@ -60,12 +60,18 @@ def genAdv(data, net, rate=1.01):
     """
     device = next(net.parameters()).device  # fetch where is the model
     image, label = data[0].to(device), data[1]
+    flag = False
     while True:
+        maxtry -= 1
+        if maxtry == 0:
+            print("Max try reached")
+            break
         grad, output = genGrad(image, net)
         _, predicted = torch.max(output.data, 1)
         if predicted != label:
             break
 
+        flag = True
         output = output[0] - output[0][label]
         output.abs_()
         output[label] = float("Inf")
@@ -79,4 +85,4 @@ def genAdv(data, net, rate=1.01):
 
         image = torch.clamp(image + delta, -1, 1)  # clamp color range
 
-    return image
+    return image, flag
