@@ -28,7 +28,7 @@ if __name__ == "__main__":
                                          download=True, transform=transform)
 
     # Init NN
-    net = Net(device=device, filename="./demoCNN.model")
+    net = Net(device=device, filename="./demoCNN.dmodel")
     tagdic = testset.classes
 
     while True:
