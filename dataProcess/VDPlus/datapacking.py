@@ -159,6 +159,9 @@ def setPack(root, tags=None, IMmode=None, delete=False, vid=0):
         # No images found
         return False
 
+    _root = Path(root)
+    filelist = [item.relative_to(_root) for item in filelist]
+
     # Loading files
     loadFiles(pack, filelist, ram=True, vid=vid)
 
@@ -167,8 +170,8 @@ def setPack(root, tags=None, IMmode=None, delete=False, vid=0):
         return False
 
     # Save package
-    pack.makeCache(Path(root).name)
-    pack.dumpMeta(Path(root).name)
+    pack.makeCache(_root.name)
+    pack.dumpMeta(_root.name)
 
     # remove files
     if delete:
