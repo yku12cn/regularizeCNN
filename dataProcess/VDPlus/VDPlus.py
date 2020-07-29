@@ -6,6 +6,8 @@
 from pathlib import Path
 import pickle
 from collections import OrderedDict
+from collections.abc import Iterable
+import random
 
 from PIL import Image
 from torchvision.datasets.vision import VisionDataset
@@ -51,6 +53,24 @@ class VDPlus(VisionDataset):
     def __getitem__(self, index):
         r"""overload __gititem__
         """
+        # Handle slice style
+        if isinstance(index, slice):
+            index = range(*index.indices(len(self)))
+
+        # Handle iter
+        if isinstance(index, Iterable):
+            _data = []
+            _targets = []
+            for i in index:
+                _d, _t = self[i]
+                _data.append(_d)
+                _targets.append(_t)
+            return _data, _targets
+
+        # Handle normal index
+        if index < 0:
+            index += len(self)
+
         img, target = self.data[index], int(self.targets[index])
 
         if isinstance(img, Path):
@@ -221,3 +241,11 @@ class VDPlus(VisionDataset):
         # Update self.classes_count
         for key, _sublist in self.classified.items():
             self.classes_count[key] = len(_sublist)
+
+    def shuffle(self):
+        r"""shuffle all data
+        """
+        _randindx = list(range(len(self)))
+        random.shuffle(_randindx)
+        self.data = [self.data[x] for x in _randindx]
+        self.targets = [self.targets[x] for x in _randindx]

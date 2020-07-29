@@ -19,10 +19,19 @@ def _stepcore(g, outs, targets, q, device, overshoot):
     outs.div_(gn)
     outs.scatter_(1, targets.unsqueeze(1), float('inf'))
     dis, sel = outs.min(1)  # select minimum perturbation
-    # Cal step size and mask out already wrong ones
-    dis.div_(gn[indx, sel].pow_(q-1)).add_(overshoot).mul_(mask)
     g = g[indx, sel]
-    g = g.abs().pow_(q-1).mul_(g.sign())
+    if q == float('inf'):
+        # Use autograd's help. Note the effect of Bug
+        # https://github.com/pytorch/pytorch/issues/41779
+        g.requires_grad_(True)
+        with torch.enable_grad():
+            g.view(g.shape[0], -1).norm(p=q, dim=1).sum().backward()
+        g = g.grad.detach().clone()
+    else:
+        dis.div_(gn[indx, sel].pow_(q-1))
+        g = g.abs().pow_(q-1).mul_(g.sign())
+    # Overshoot and mask out already wrong ones
+    dis.add_(overshoot).mul_(mask)
     g = g.transpose_(0, -1).mul_(dis).transpose_(0, -1)
 
     return g, sel, mask.sum()
@@ -72,12 +81,16 @@ def deepfoolGD(data, clf, q=2, device=None, rate=0.5, overshoot=0.000001):
     targets = data[1].to(device)
     nx = torch.zeros(x.shape)
     nx.add_(x)
-
+    life = 150  # Max tries before do random step size search
     while True:
         g, outs = genGrad(nx, clf, device=device)
         delta, sel, corr = _stepcore(g, outs, targets, q, device, overshoot)
         if corr.eq(0):
             break
-        nx.add_(delta, alpha=rate)
-
+        if life:
+            life -= 1
+            nx.add_(delta, alpha=rate)
+        else:
+            # random step size search
+            nx.add_(delta, alpha=2*rate*torch.rand(1).item())
     return nx.add_(-x), sel

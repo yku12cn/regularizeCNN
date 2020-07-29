@@ -9,3 +9,4 @@ from .datapacking import loadFiles, setUnpack, setPack
 # Varients of VDPlus
 from .setfromfolder import setfromfolder
 from .setfromPack import setfromPack
+from .setKFolds import setKFold

@@ -5,5 +5,5 @@
 
 from .utils import calMD5
 from .VDPlus import VDPlus, setUnpack, setPack,\
-    setfromfolder, setfromPack
+    setfromfolder, setfromPack, setKFold
 from .contaminate import genDirtySet

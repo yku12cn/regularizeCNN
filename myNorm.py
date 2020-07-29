@@ -7,6 +7,14 @@ import torch
 from ykuTorch import cNorm
 
 
+class l2Square(cNorm):
+    r"""Traditional ML norm
+        L_2 ^ 2, its derivative is just x
+    """
+    def __call__(self, x):
+        return x
+
+
 class lnNorm(cNorm):
     r""" Derivative of ln norm
 

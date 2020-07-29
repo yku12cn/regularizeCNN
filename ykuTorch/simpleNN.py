@@ -23,9 +23,9 @@ class simpleNN(nn.Module):
         you can set device and filename if you want to load existed model
 
     Args:
-        device ([type], optional): "gpu" or "cpu". Defaults to None.
+        device (torch.device, optional): on which device.
             by default, device point to torch._C._get_default_device()
-        filename ([type], optional): path to existing model. Defaults to None.
+        filename (str/Path, optional): path to existing model.
             if filename is presented, saved weights will be loaded from file
     """
     def NNstruct(self):
@@ -150,7 +150,8 @@ Optimizer: {type(optimizer).__name__}
         # Build progress bar
         pb = tqdm(total=epoch*len(dataset), desc=f"Training NN on {device}: ",
                   leave=True, ascii=(os.name == "nt"), mininterval=0.3)
-        logPE = int(max(len(loader)/logPE, 1))
+        pwrite = bool(logPE)
+        logPE = int(max(len(loader)/(logPE if pwrite else 100), 1))
         for ep in range(epoch):
             running_loss = 0.0
             for i, data in enumerate(loader, 0):
@@ -168,22 +169,19 @@ Optimizer: {type(optimizer).__name__}
                 # print statistics
                 running_loss += loss.item()
                 if (logPE == 1) or (i % logPE == logPE - 1):
-                    logstr = f"\
+                    if pwrite:
+                        logstr = f"\
 Ep {ep+1}/{epoch} - trained {(i+1)*loader.batch_size}:  \
 loss_{round(running_loss / logPE, 3)}"
-                    if isinstance(loger, printLog):
-                        loger(logstr, redirect=True, t=True)
-                    if getattr(pb, "write", None):
+                        if isinstance(loger, printLog):
+                            loger(logstr, redirect=True, t=True)
                         pb.write(logstr)
+                    else:
+                        pb.set_postfix_str(f"Loss: {running_loss/logPE:.3f}")
                     running_loss = 0.0
                 pb.update(len(labels))
         pb.close()
-        if getattr(pb, "format_interval", None):
-            logstr = pb.format_interval(pb.format_dict["elapsed"])
-            logstr = f"Done training in {logstr}."
-        else:
-            logstr = "Done training."
-
+        logstr = pb.format_interval(pb.format_dict["elapsed"])
         if isinstance(loger, printLog):
             loger(logstr, t=True)
         else:
