@@ -29,6 +29,7 @@
 * numpy 1.18.5
 * matplotlib 3.2.2
 * tqdm 4.46.1
+* pillow 7.2.0
 
 ## Usage
 

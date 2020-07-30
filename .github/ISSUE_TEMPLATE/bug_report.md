@@ -29,6 +29,7 @@ If applicable, add screenshots to help explain your problem.
  - numpy version: 
  - tqdm version: 
  - matplotlib version: 
+ - pillow version: 
 
 **Additional context**
 Add any other context about the problem here.
